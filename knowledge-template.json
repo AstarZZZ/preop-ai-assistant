@@ -1,0 +1,33 @@
+{
+  "schema_version": "preop-knowledge-1",
+  "items": [
+    {
+      "name": "示例：院内专项讨论要点",
+      "category": "院内制度",
+      "rule_type": "required_discussion",
+      "severity": "warning",
+      "surgery_keywords": ["示例手术名称"],
+      "trigger_terms": [],
+      "required_terms": ["示例要点A", "示例要点B"],
+      "message": "转写中未明确找到该院内专项讨论要点，请由医务人员人工复核。",
+      "source": "请替换为院内制度名称与文件编号",
+      "version": "draft-1",
+      "created_by": "请填写维护人",
+      "enabled": false
+    },
+    {
+      "name": "示例：患者条件性核对",
+      "category": "围术期核对",
+      "rule_type": "conditional_term",
+      "severity": "high",
+      "surgery_keywords": [],
+      "trigger_terms": ["示例患者条件"],
+      "required_terms": ["示例处理要点", "示例复核项"],
+      "message": "患者资料命中指定条件，但讨论转写中未找到对应核对内容，请人工复核。",
+      "source": "请替换为经临床专业组审核的知识来源",
+      "version": "draft-1",
+      "created_by": "请填写维护人",
+      "enabled": false
+    }
+  ]
+}

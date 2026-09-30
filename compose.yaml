@@ -1,0 +1,62 @@
+name: preop-ai
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      PREOP_ASR_BACKEND: remote
+      PREOP_ASR_URL: http://asr:8766
+      PREOP_LLM_URL: http://ollama:11434/v1
+      PREOP_LLM_MODEL: ${PREOP_LLM_MODEL:-qwen3:4b}
+      PREOP_DB_PATH: /app/data/preop.db
+      PREOP_UPLOAD_DIR: /app/data/uploads
+    ports:
+      - "${PREOP_PORT:-8765}:8765"
+    volumes:
+      - ./data:/app/data
+    depends_on:
+      asr:
+        condition: service_healthy
+      ollama-init:
+        condition: service_completed_successfully
+    restart: unless-stopped
+
+  asr:
+    build:
+      context: .
+      dockerfile: docker/asr.Dockerfile
+    environment:
+      PREOP_MODELS_ROOT: /models
+      PREOP_ASR_DEVICE: ${PREOP_ASR_DEVICE:-cpu}
+      PREOP_ASR_CPU_THREADS: ${PREOP_ASR_CPU_THREADS:-6}
+      PREOP_ALLOW_MODEL_DOWNLOAD: ${PREOP_ALLOW_MODEL_DOWNLOAD:-0}
+    ports:
+      - "127.0.0.1:${PREOP_ASR_PORT:-8766}:8766"
+    volumes:
+      - ./models:/models
+    restart: unless-stopped
+
+  ollama:
+    image: ollama/ollama:0.9.0
+    volumes:
+      - ollama-models:/root/.ollama
+    ports:
+      - "127.0.0.1:${OLLAMA_PORT:-11434}:11434"
+    restart: unless-stopped
+
+  ollama-init:
+    image: ollama/ollama:0.9.0
+    environment:
+      OLLAMA_HOST: http://ollama:11434
+    volumes:
+      - ollama-models:/root/.ollama
+    depends_on:
+      - ollama
+    entrypoint: ["/bin/sh", "-c"]
+    command: ["until ollama list >/dev/null 2>&1; do sleep 2; done; ollama pull ${PREOP_LLM_MODEL:-qwen3:4b}"]
+    restart: "no"
+
+volumes:
+  ollama-models:
